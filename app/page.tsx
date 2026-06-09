@@ -1,3 +1,5 @@
+import { CopyUrl } from "@/components/CopyUrl";
+
 const ASCII = String.raw`
 ███╗   ███╗ ██████╗ ███╗   ██╗ █████╗ ██████╗ ██╗  ██╗██╗████████╗
 ████╗ ████║██╔═══██╗████╗  ██║██╔══██╗██╔══██╗██║ ██╔╝██║╚══██╔══╝
@@ -13,28 +15,32 @@ export default function Home() {
     <main className="wrap">
       <pre className="ascii-title">{ASCII}</pre>
 
+      <div>
+        <span className="subtitle-badge">VIBECODE WEB3 · ONE MCP URL</span>
+      </div>
+
       <p className="tagline">
-        One MCP URL that turns Base44&apos;s AI builder into a Monad web3 app
-        builder. Vibecode consumer crypto apps — invisible wallets, gasless
-        USDC payments — in one prompt.
+        Turn any AI app builder into a <em>Monad web3 app builder</em>.
+        Describe your app in English — get invisible wallets, gasless USDC
+        payments, and battle-tested onchain code. No seed phrases. No gas. No
+        crypto words.
       </p>
 
-      <nav className="tabs">
-        <span className="active">Base44</span>
-        <span>Claude Code</span>
-        <span>Any MCP client</span>
-      </nav>
-
-      <div className="urlbox">{MCP_URL}</div>
+      <CopyUrl url={MCP_URL} />
       <p className="urlbox-hint">
-        Base44 → Settings → MCP connections → Add custom MCP → Auth: Not
-        required. Then prompt: &quot;Use the Monad MCP to build…&quot;
+        Paste into your builder&apos;s MCP settings · Auth: Not required · then
+        prompt: &quot;Use the Monad MCP to build…&quot;
       </p>
 
       <div className="workswith">
-        WORKS WITH <span>Base44 · Claude · Cursor · Windsurf · any MCP host</span>
+        WORKS WITH{" "}
+        <span>
+          <strong>Base44</strong> · <strong>Lovable</strong> · Claude · Cursor ·
+          all vibecoding apps
+        </span>
       </div>
 
+      <p className="section-label">— FOUR TOOLS —</p>
       <section className="tools">
         <div className="tool">
           <h3>get_monad_playbook</h3>

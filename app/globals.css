@@ -5,13 +5,14 @@
 }
 
 :root {
-  --bg: #0d0a16;
-  --panel: #151022;
+  --bg: #08060f;
+  --panel: rgba(21, 16, 34, 0.75);
   --border: #2a2140;
   --purple: #8b7cf8;
-  --purple-bright: #a99bff;
-  --text: #cfc8e8;
-  --dim: #6f6590;
+  --purple-bright: #b4a7ff;
+  --cyan: #67e8f9;
+  --text: #d6cff0;
+  --dim: #756b9a;
 }
 
 html,
@@ -21,6 +22,41 @@ body {
   font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas,
     "Liberation Mono", Menlo, monospace;
   min-height: 100%;
+}
+
+/* ---- futuristic backdrop: perspective grid + aurora glows ---- */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-image: linear-gradient(rgba(139, 124, 248, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 124, 248, 0.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 30%, transparent 80%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 35% at 25% 8%, rgba(139, 124, 248, 0.18), transparent 70%),
+    radial-gradient(ellipse 45% 30% at 78% 15%, rgba(103, 232, 249, 0.1), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(139, 124, 248, 0.12), transparent 70%);
+  animation: aurora 9s ease-in-out infinite alternate;
+}
+
+@keyframes aurora {
+  from {
+    opacity: 0.75;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 a {
@@ -33,83 +69,131 @@ a:hover {
 }
 
 .wrap {
-  max-width: 980px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 72px 24px 48px;
+  padding: 76px 24px 48px;
   text-align: center;
 }
 
+/* ---- title ---- */
 .ascii-title {
   display: inline-block;
-  color: var(--purple);
-  text-shadow: 0 0 24px rgba(139, 124, 248, 0.45);
+  background: linear-gradient(180deg, #cfc4ff 0%, var(--purple) 55%, #5b4bd4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 22px rgba(139, 124, 248, 0.55));
   font-size: clamp(6px, 1.55vw, 15px);
   line-height: 1.15;
   text-align: left;
   user-select: none;
+  animation: titlePulse 4s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 18px rgba(139, 124, 248, 0.45));
+  }
+  50% {
+    filter: drop-shadow(0 0 34px rgba(139, 124, 248, 0.8));
+  }
+}
+
+.subtitle-badge {
+  display: inline-block;
+  margin-top: 22px;
+  padding: 6px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--cyan);
+  background: var(--panel);
 }
 
 .tagline {
-  margin: 36px auto 0;
-  max-width: 720px;
+  margin: 26px auto 0;
+  max-width: 740px;
   font-size: 17px;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
-.tabs {
+.tagline em {
+  color: var(--purple-bright);
+  font-style: normal;
+}
+
+/* ---- copyable URL ---- */
+.urlbox {
   margin: 44px auto 0;
   display: flex;
-  justify-content: center;
-  gap: 36px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 14px;
-  font-size: 15px;
-  color: var(--dim);
-}
-
-.tabs .active {
-  color: var(--purple-bright);
-  position: relative;
-}
-
-.tabs .active::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -15px;
-  height: 2px;
-  background: var(--purple);
-}
-
-.urlbox {
-  margin: 28px auto 0;
-  max-width: 760px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: 780px;
   background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 26px 20px;
-  font-size: clamp(13px, 2.1vw, 19px);
+  border: 1px solid var(--purple);
+  border-radius: 12px;
+  padding: 22px 22px;
+  font-family: inherit;
+  font-size: clamp(12px, 2vw, 18px);
   color: var(--purple-bright);
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 0 0 1px rgba(139, 124, 248, 0.15), 0 0 30px rgba(139, 124, 248, 0.18);
+  transition: box-shadow 0.25s ease, transform 0.15s ease;
+}
+
+.urlbox:hover {
+  box-shadow: 0 0 0 1px rgba(139, 124, 248, 0.4), 0 0 46px rgba(139, 124, 248, 0.35);
+  transform: translateY(-1px);
+}
+
+.url-text {
   overflow-x: auto;
   white-space: nowrap;
+  user-select: all;
+}
+
+.copy-chip {
+  flex-shrink: 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  transition: all 0.2s ease;
+}
+
+.urlbox:hover .copy-chip {
+  color: var(--purple-bright);
+  border-color: var(--purple);
+}
+
+.copy-chip.copied {
+  color: #4ade80;
+  border-color: #4ade80;
 }
 
 .urlbox-hint {
-  margin-top: 12px;
+  margin-top: 14px;
   font-size: 13px;
   color: var(--dim);
 }
 
+/* ---- works-with marquee strip ---- */
 .workswith {
-  margin: 30px auto 0;
+  margin: 34px auto 0;
   display: inline-flex;
   align-items: center;
   gap: 18px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 14px 24px;
+  padding: 14px 26px;
   font-size: 13px;
   letter-spacing: 0.18em;
   color: var(--dim);
@@ -120,8 +204,21 @@ a:hover {
   color: var(--text);
 }
 
+.workswith strong {
+  color: var(--purple-bright);
+  font-weight: 600;
+}
+
+/* ---- tool cards ---- */
+.section-label {
+  margin-top: 70px;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  color: var(--dim);
+}
+
 .tools {
-  margin: 56px auto 0;
+  margin: 22px auto 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
@@ -131,8 +228,33 @@ a:hover {
 .tool {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: 12px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.tool::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139, 124, 248, 0.7), transparent);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.tool:hover {
+  border-color: var(--purple);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(139, 124, 248, 0.18);
+}
+
+.tool:hover::before {
+  opacity: 1;
 }
 
 .tool h3 {
@@ -142,38 +264,44 @@ a:hover {
   font-weight: 600;
 }
 
+.tool h3::before {
+  content: "▸ ";
+  color: var(--cyan);
+}
+
 .tool p {
   font-size: 13px;
   line-height: 1.65;
-  color: var(--text);
 }
 
+/* ---- tag-me panel ---- */
 .tagme {
-  margin: 64px auto 0;
-  max-width: 760px;
+  margin: 70px auto 0;
+  max-width: 780px;
   border: 1px solid var(--purple);
-  border-radius: 10px;
-  padding: 30px 26px;
+  border-radius: 14px;
+  padding: 34px 28px;
   background: linear-gradient(
     180deg,
-    rgba(139, 124, 248, 0.08),
-    rgba(139, 124, 248, 0.02)
+    rgba(139, 124, 248, 0.12),
+    rgba(103, 232, 249, 0.04)
   );
+  box-shadow: 0 0 40px rgba(139, 124, 248, 0.12) inset;
 }
 
 .tagme h2 {
   color: var(--purple-bright);
-  font-size: 19px;
+  font-size: 20px;
   margin-bottom: 14px;
 }
 
 .tagme p {
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 .tagme .links {
-  margin-top: 18px;
+  margin-top: 20px;
   display: flex;
   justify-content: center;
   gap: 14px;
@@ -183,22 +311,26 @@ a:hover {
 .tagme .links a {
   display: inline-block;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 18px;
+  border-radius: 9px;
+  padding: 11px 20px;
   font-size: 14px;
-  background: var(--panel);
+  background: rgba(8, 6, 15, 0.6);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .tagme .links a:hover {
   border-color: var(--purple);
+  box-shadow: 0 0 22px rgba(139, 124, 248, 0.35);
+  transform: translateY(-2px);
   text-decoration: none;
 }
 
+/* ---- footer ---- */
 .footer {
-  margin-top: 72px;
-  padding-top: 28px;
+  margin-top: 80px;
+  padding-top: 30px;
   border-top: 1px solid var(--border);
   font-size: 13px;
   color: var(--dim);
-  line-height: 2;
+  line-height: 2.1;
 }

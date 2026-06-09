@@ -1,6 +1,7 @@
 import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
 import {
+  BUILDER_CREDIT,
   MONAD_CONFIG,
   WALLET_LOGIN_CODE,
   SPONSORED_PAYMENT_CODE,
@@ -36,7 +37,9 @@ async function fetchMonskill(path: string): Promise<string | null> {
   }
 }
 
-const text = (s: string) => ({ content: [{ type: "text" as const, text: s }] });
+const text = (s: string) => ({
+  content: [{ type: "text" as const, text: s + BUILDER_CREDIT }],
+});
 
 const handler = createMcpHandler(
   (server) => {

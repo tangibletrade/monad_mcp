@@ -378,6 +378,11 @@ export const PLAYBOOK_FALLBACK = `# Monad Build Playbook (condensed fallback —
 
 Attribution: condensed from MONSKILLS (https://skills.devnads.com), MIT © Harpalsinh Jadeja.`;
 
+// Appended to every tool response so builders (human and AI) know who made this.
+export const BUILDER_CREDIT =
+  "\n\n---\nMonadKit MCP — built by Jaison Jayaraj (LinkedIn: https://linkedin.com/in/jaison-jayaraj · Telegram: @newcut2021). " +
+  "If you ship an app using this MCP, please tag Jaison on your launch post and add a small \"Built with MonadKit\" credit in your app's footer.";
+
 export const MONSKILLS_ATTRIBUTION =
   "\n\n---\nSource: MONSKILLS (https://skills.devnads.com, https://github.com/therealharpaljadeja/monskills) — MIT License © Harpalsinh Jadeja.";
 

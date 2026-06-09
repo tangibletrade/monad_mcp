@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MonadKit — How it works</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #070b14; --card: #0d1322; --border: #1c2740;
+    --violet: #7c5cff; --cyan: #22d3ee; --green: #34d399; --lime: #b4f168;
+    --orange: #ff983b; --text: #e2e8f5; --dim: #8b95b5;
+    --grad: linear-gradient(92deg, #7c5cff 0%, #22d3ee 100%);
+  }
+  body { background: var(--bg); color: var(--text);
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased; padding: 48px 4vw 64px; }
+  body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(ellipse 45% 40% at 85% -5%, rgba(124,92,255,.2), transparent 70%),
+      radial-gradient(ellipse 40% 35% at 0% 110%, rgba(34,211,238,.12), transparent 70%); }
+  .head { display: flex; align-items: center; gap: 16px; max-width: 1280px; margin: 0 auto 8px; }
+  .head img { width: 52px; }
+  .head h1 { font-size: clamp(24px, 3vw, 36px); font-weight: 800; letter-spacing: -.02em; }
+  .head h1 span { background: var(--grad); -webkit-background-clip: text;
+    background-clip: text; color: transparent; }
+  .lead { max-width: 1280px; margin: 0 auto; color: var(--dim); font-size: 15px; }
+
+  .phase { max-width: 1280px; margin: 40px auto 0; }
+  .phase-label { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12px;
+    letter-spacing: .25em; margin-bottom: 6px; }
+  .phase-label.build { color: var(--cyan); }
+  .phase-label.run { color: var(--lime); }
+  .phase-sub { color: var(--dim); font-size: 13.5px; margin-bottom: 18px; }
+
+  .flow { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; }
+  .node { flex: 1 1 0; min-width: 200px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 14px; padding: 18px 18px 16px;
+    position: relative; }
+  .node .who { font-family: "JetBrains Mono", monospace; font-size: 10.5px;
+    letter-spacing: .14em; color: var(--dim); }
+  .node h3 { margin-top: 8px; font-size: 16.5px; font-weight: 800; letter-spacing: -.01em; }
+  .node p { margin-top: 8px; font-size: 12.5px; line-height: 1.6; color: var(--dim); }
+  .node p b { color: var(--text); }
+  .node .free { position: absolute; top: 14px; right: 14px; font-size: 10px;
+    font-weight: 800; letter-spacing: .08em; color: var(--green);
+    border: 1px solid rgba(52,211,153,.4); border-radius: 6px; padding: 3px 7px; }
+  .node.hl { border-color: var(--violet); box-shadow: 0 0 34px rgba(124,92,255,.18); }
+  .node.money { border-color: rgba(180,241,104,.5); }
+
+  .arrow { flex: 0 0 44px; display: flex; align-items: center; justify-content: center; }
+  .arrow span { font-size: 22px; background: var(--grad); -webkit-background-clip: text;
+    background-clip: text; color: transparent; }
+  @media (max-width: 980px) {
+    .flow { flex-direction: column; }
+    .arrow { transform: rotate(90deg); flex-basis: 30px; }
+  }
+
+  .callout { max-width: 1280px; margin: 44px auto 0; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .co { border-radius: 14px; padding: 18px 20px; background: var(--card);
+    border: 1px solid var(--border); font-size: 13px; line-height: 1.65; color: var(--dim); }
+  .co b { color: var(--text); }
+  .co .t { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .18em;
+    display: block; margin-bottom: 8px; }
+  .co.gas .t { color: var(--green); }
+  .co.sec .t { color: var(--cyan); }
+  .co.ctr .t { color: var(--violet); }
+
+  .foot { max-width: 1280px; margin: 40px auto 0; font-size: 12px; color: #56608a;
+    font-family: "JetBrains Mono", monospace; }
+  .foot a { color: var(--cyan); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <img src="/logo.svg" alt="MonadKit">
+  <h1>How <span>MonadKit</span> works — prompt to payment</h1>
+</div>
+<p class="lead">Two phases. Build time happens once, in the AI builder. Runtime happens every day, in the user's browser — with zero gas and zero crypto words.</p>
+
+<div class="phase">
+  <div class="phase-label build">▸ PHASE 1 · BUILD TIME — happens once</div>
+  <div class="phase-sub">A creator describes the app. The AI builder consults MonadKit instead of guessing.</div>
+  <div class="flow">
+    <div class="node">
+      <span class="who">CREATOR · NON-CODER</span>
+      <h3>💬 One prompt</h3>
+      <p>"Use the Monad MCP to build a <b>bill-split app</b> where roommates pay their share on Monad."</p>
+    </div>
+    <div class="arrow"><span>→</span></div>
+    <div class="node">
+      <span class="who">BASE44 / LOVABLE</span>
+      <h3>🤖 AI builder</h3>
+      <p>Generates the React app + database entities — and <b>calls MonadKit's tools mid-build</b> for everything onchain.</p>
+    </div>
+    <div class="arrow"><span>→</span></div>
+    <div class="node hl">
+      <span class="who">MONADKIT MCP · THIS PROJECT</span>
+      <h3>⚡ 5 tools</h3>
+      <p>Live MONSKILLS docs · verified network config · wallet + payment scaffolds · <b>compiles Solidity to bytecode</b> · app blueprints.</p>
+    </div>
+    <div class="arrow"><span>→</span></div>
+    <div class="node">
+      <span class="who">OUTPUT</span>
+      <h3>📱 Working app</h3>
+      <p>Email login, $ balances, Pay buttons, contract bytecode baked in as constants. <b>Shipped without writing code.</b></p>
+    </div>
+  </div>
+</div>
+
+<div class="phase">
+  <div class="phase-label run">▸ PHASE 2 · RUNTIME — every user, every payment</div>
+  <div class="phase-sub">The user taps "Pay $20". Five things happen in ~2 seconds. They see none of them.</div>
+  <div class="flow">
+    <div class="node">
+      <span class="who">USER · HOLDS 0 MON</span>
+      <h3>👆 Taps "Pay $20"</h3>
+      <p>Logged in with <b>email only</b>. No seed phrase, no extension, no gas token. Just USDC and a button.</p>
+      <span class="free">$0 GAS</span>
+    </div>
+    <div class="arrow"><span>→</span></div>
+    <div class="node">
+      <span class="who">PRIVY · IN-BROWSER</span>
+      <h3>✍️ Wallet signs</h3>
+      <p>The invisible embedded wallet <b>signs the UserOperation</b>. Signing is pure cryptography — free, instant, no popup.</p>
+      <span class="free">FREE</span>
+    </div>
+    <div class="arrow"><span>→</span></div>
+    <div class="node money">
+      <span class="who">PIMLICO · PAYS THE GAS</span>
+      <h3>⛽ Paymaster + bundler</h3>
+      <p>Paymaster signs "I'll cover gas". Bundler wraps it in a real transaction and <b>pays the MON itself</b>. Free on testnet.</p>
+    </div>
+    <div class="arrow"><span>→</span></div>
+    <div class="node">
+      <span class="who">MONAD · PARALLEL EVM</span>
+      <h3>🟣 Onchain in ~1s</h3>
+      <p>EntryPoint verifies both signatures → smart account sends <b>USDC transfer</b> (or deploys a contract via CREATE2). Done.</p>
+    </div>
+    <div class="arrow"><span>→</span></div>
+    <div class="node">
+      <span class="who">BACK IN THE APP</span>
+      <h3>✅ "Paid $20"</h3>
+      <p>Share marked paid, txHash stored in the entity. User saw a spinner for a second. <b>That's it. That's the demo.</b></p>
+    </div>
+  </div>
+</div>
+
+<div class="callout">
+  <div class="co gas"><span class="t">WHO PAYS GAS?</span>
+    <b>Never the user.</b> Pimlico's bundler fronts the MON and its paymaster reimburses it —
+    free on Monad Testnet, billed to the developer on mainnet. User balance required: <b>0 MON, forever.</b></div>
+  <div class="co sec"><span class="t">WHY IT'S SAFE</span>
+    MonadKit is <b>read-only at build time</b> — it serves docs, config and code. It holds no keys,
+    touches no funds, and isn't in the runtime path at all. Kill the MCP and every shipped app keeps working.</div>
+  <div class="co ctr"><span class="t">CUSTOM CONTRACTS?</span>
+    The MCP <b>compiles Solidity server-side</b> (solc inside the MCP). The user's own browser deploys the
+    bytecode gas-free through the CREATE2 factory. <b>No Remix, no CLI, no MetaMask.</b></div>
+</div>
+
+<p class="foot">monad-mcp-rosy.vercel.app · live tool feed at <a href="/activity">/activity</a> · built by Jaison Jayaraj · // vibecode onchain</p>
+
+</body>
+</html>

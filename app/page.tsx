@@ -7,7 +7,14 @@ export default function Home() {
     <>
       <nav className="nav">
         <div className="logo">
-          <span className="spark">⚡</span> MonadKit
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="MonadKit" className="logo-icon" />
+          <span className="logo-word">
+            <span className="mono">
+              Monad<span className="kit">Kit</span>
+            </span>
+            <span className="logo-tag mono">// vibecode onchain</span>
+          </span>
         </div>
         <div className="nav-links">
           <a href="#tools">Tools</a>

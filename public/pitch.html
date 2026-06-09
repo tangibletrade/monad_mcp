@@ -58,12 +58,28 @@
     color: var(--dim); }
   .tag b { background: var(--grad); -webkit-background-clip: text;
     background-clip: text; color: transparent; }
+  .brand { display: flex; align-items: center; gap: 18px; margin-bottom: 38px; }
+  .brand.small { margin-bottom: 26px; }
+  .brand img { width: clamp(54px, 7vw, 88px); height: auto; }
+  .brand.small img { width: clamp(40px, 5vw, 60px); }
+  .brand-word { font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-weight: 700; font-size: clamp(28px, 4vw, 52px); letter-spacing: -.02em;
+    color: #f4f4f8; text-align: left; display: flex; flex-direction: column;
+    line-height: 1.15; }
+  .brand.small .brand-word { font-size: clamp(20px, 2.6vw, 32px); }
+  .brand-word .kit { color: #8470f2; display: inline; }
+  .brand-word small { font-size: clamp(12px, 1.4vw, 18px); font-weight: 600;
+    color: #b4f168; }
 </style>
 </head>
 <body>
 
 <section class="slide active">
-  <div class="kicker">⚡ MonadKit · Monad Hackathon</div>
+  <div class="brand">
+    <img src="/logo.svg" alt="MonadKit">
+    <span class="brand-word"><span>Monad<span class="kit">Kit</span></span><small>// vibecode onchain</small></span>
+  </div>
+  <div class="kicker">Monad Hackathon</div>
   <h1>We taught a no-code builder to <span class="grad">commit blockchain.</span></h1>
   <p class="sub">One MCP URL. Any idea. A working web3 app on Monad.<br>
   Built in an hour. Emotionally? Years.</p>
@@ -138,6 +154,10 @@
 </section>
 
 <section class="slide">
+  <div class="brand small">
+    <img src="/logo.svg" alt="MonadKit">
+    <span class="brand-word"><span>Monad<span class="kit">Kit</span></span><small>// vibecode onchain</small></span>
+  </div>
   <div class="kicker">the close</div>
   <h2>A non-coder just shipped an <span class="grad">onchain app</span> in one prompt.</h2>
   <p class="sub">Multiply by every Base44 and Lovable user on Earth.<br>

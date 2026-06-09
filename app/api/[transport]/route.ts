@@ -1,7 +1,9 @@
 import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
+import { createRequire } from "module";
 import {
   BUILDER_CREDIT,
+  DEPLOY_CONTRACT_CODE,
   MONAD_CONFIG,
   WALLET_LOGIN_CODE,
   SPONSORED_PAYMENT_CODE,
@@ -35,6 +37,16 @@ async function fetchMonskill(path: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+const require_ = createRequire(import.meta.url);
+
+// solc is a multi-MB emscripten binary — load lazily (only when the compile
+// tool is called) and keep the loaded module for the instance lifetime.
+let solcInstance: any;
+function getSolc() {
+  if (!solcInstance) solcInstance = require_("solc");
+  return solcInstance;
 }
 
 const text = (s: string) => ({
@@ -90,13 +102,93 @@ const handler = createMcpHandler(
       "Returns correct, paste-ready React code for Monad features (Privy embedded wallet login, Pimlico gas-sponsored payments). ALWAYS use this code instead of writing wallet/payment code from scratch.",
       {
         feature: z
-          .enum(["wallet_login", "sponsored_payment"])
+          .enum(["wallet_login", "sponsored_payment", "deploy_contract"])
           .describe(
-            "wallet_login = email login with invisible embedded wallet (Privy). sponsored_payment = gasless USDC send via Kernel smart account + Pimlico paymaster."
+            "wallet_login = email login with invisible embedded wallet (Privy). sponsored_payment = gasless USDC send via Kernel smart account + Pimlico paymaster. deploy_contract = deploy a custom Solidity contract from the browser, gas-sponsored, via CREATE2 factory (compile it first with compile_monad_contract)."
           ),
       },
       async ({ feature }) =>
-        text(feature === "wallet_login" ? WALLET_LOGIN_CODE : SPONSORED_PAYMENT_CODE)
+        text(
+          feature === "wallet_login"
+            ? WALLET_LOGIN_CODE
+            : feature === "sponsored_payment"
+              ? SPONSORED_PAYMENT_CODE
+              : DEPLOY_CONTRACT_CODE
+        )
+    );
+
+    server.tool(
+      "compile_monad_contract",
+      "Compiles Solidity source code and returns the ABI + deployment bytecode, ready to deploy on Monad from the browser (pair with scaffold_monad_feature('deploy_contract')). ALWAYS use this instead of asking the user to compile locally — app builders like Base44 cannot run a compiler.",
+      {
+        source: z
+          .string()
+          .max(100_000)
+          .describe("Complete Solidity source code (pragma ^0.8.x)."),
+        contractName: z
+          .string()
+          .optional()
+          .describe(
+            "Which contract to return artifacts for, if the source defines several. Defaults to the last contract in the file."
+          ),
+      },
+      async ({ source, contractName }) => {
+        const input = {
+          language: "Solidity",
+          sources: { "Contract.sol": { content: source } },
+          settings: {
+            optimizer: { enabled: true, runs: 200 },
+            outputSelection: { "*": { "*": ["abi", "evm.bytecode.object"] } },
+          },
+        };
+        const output = JSON.parse(getSolc().compile(JSON.stringify(input)));
+
+        const errors = (output.errors ?? []).filter(
+          (e: any) => e.severity === "error"
+        );
+        if (errors.length > 0) {
+          return text(
+            "# Compilation failed\n\n" +
+              errors.map((e: any) => e.formattedMessage).join("\n") +
+              "\n\nFix the Solidity source and call compile_monad_contract again."
+          );
+        }
+
+        const contracts = output.contracts?.["Contract.sol"] ?? {};
+        const names = Object.keys(contracts);
+        if (names.length === 0) {
+          return text("# Compilation produced no contracts — check the source.");
+        }
+        const name =
+          contractName && names.includes(contractName)
+            ? contractName
+            : names[names.length - 1];
+        const artifact = contracts[name];
+        const bytecode = "0x" + artifact.evm.bytecode.object;
+
+        return text(
+          `# Compiled: ${name} (solc ${getSolc().version()}, optimizer 200 runs)
+
+## ABI
+\`\`\`json
+${JSON.stringify(artifact.abi)}
+\`\`\`
+
+## Deployment bytecode
+\`\`\`
+${bytecode}
+\`\`\`
+
+## Next step
+Paste ABI and bytecode into the app as constants, then deploy gas-free from the
+browser with the useDeployContract hook from scaffold_monad_feature("deploy_contract").
+Constructor args go in the hook's \`args\` option — do NOT append them to the bytecode
+manually (encodeDeployData does that).` +
+            (names.length > 1
+              ? `\n\nOther contracts in this source: ${names.filter((n) => n !== name).join(", ")} — pass contractName to get their artifacts.`
+              : "")
+        );
+      }
     );
 
     server.tool(

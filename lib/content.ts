@@ -352,6 +352,122 @@ export const OFFICIAL_TEMPLATES = `# Official Monad Templates (from docs.monad.x
 | React Native Thirdweb embedded wallet | https://docs.monad.xyz/templates/react-native-thirdweb-embedded-wallet | mobile/expo |
 | Farcaster Mini App | https://docs.monad.xyz/templates/farcaster-miniapp/getting-started | miniapp |`;
 
+export const DEPLOY_CONTRACT_CODE = `# Monad Feature: Deploy a Custom Contract from the Browser (gas-sponsored)
+
+Base44 apps can't run a CLI or compiler — but they don't need to. The pipeline:
+
+1. **Compile**: call the \`compile_monad_contract\` MCP tool with your Solidity source →
+   get back ABI + bytecode (paste them into the app as constants).
+2. **Deploy at runtime**: the hook below deploys that bytecode through the user's
+   gas-sponsored smart account via the canonical CREATE2 factory
+   (\`0x4e59b44847b379578588920cA78FbF26c0B4956C\` — verified deployed on Monad Testnet).
+   No CLI, no MetaMask, no gas. Deterministic address; store it in an entity after deploy.
+
+> Note: works from the Kernel smart account because the FACTORY executes CREATE2
+> (Monad's EIP-7702 restriction on CREATE/CREATE2 applies only to delegated EOAs
+> executing those opcodes directly).
+
+## The hook
+
+\`\`\`tsx
+// src/hooks/useDeployContract.ts
+import { useCallback, useState } from "react";
+import {
+  concatHex,
+  encodeDeployData,
+  getContractAddress,
+  type Abi,
+  type Hex,
+} from "viem";
+import { useSmartWallet } from "./useSmartWallet"; // from scaffold_monad_feature("sponsored_payment")
+
+const CREATE2_FACTORY = "0x4e59b44847b379578588920cA78FbF26c0B4956C" as const;
+
+export function useDeployContract() {
+  const { getSmartAccountClient } = useSmartWallet(); // export it from useSmartWallet
+  const [deploying, setDeploying] = useState(false);
+
+  /**
+   * Deploys a contract gas-free and returns its (deterministic) address.
+   * salt: unique 32-byte hex per instance (e.g. keccak256 of the group/bill id) —
+   * reusing a salt with identical bytecode reverts (already deployed).
+   */
+  const deployContract = useCallback(
+    async (opts: { abi: Abi; bytecode: Hex; args?: unknown[]; salt: Hex }) => {
+      setDeploying(true);
+      try {
+        const creationCode = encodeDeployData({
+          abi: opts.abi,
+          bytecode: opts.bytecode,
+          args: opts.args ?? [],
+        });
+        const address = getContractAddress({
+          opcode: "CREATE2",
+          from: CREATE2_FACTORY,
+          salt: opts.salt,
+          bytecode: creationCode,
+        });
+        const client = await getSmartAccountClient();
+        await client.sendTransaction({
+          to: CREATE2_FACTORY,
+          data: concatHex([opts.salt, creationCode]),
+        });
+        return address; // persist this in your entity (e.g. Group.contractAddress)
+      } finally {
+        setDeploying(false);
+      }
+    },
+    [getSmartAccountClient]
+  );
+
+  return { deployContract, deploying };
+}
+\`\`\`
+
+## Example contract to start from (compile it with compile_monad_contract)
+
+\`\`\`solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/// Minimal shared vault: members contribute USDC, creator can pay out.
+interface IERC20 {
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    function transfer(address to, uint256 amount) external returns (bool);
+}
+
+contract GroupVault {
+    address public immutable creator;
+    IERC20 public immutable token;
+    mapping(address => uint256) public contributed;
+    uint256 public total;
+
+    constructor(address _token, address _creator) {
+        token = IERC20(_token);
+        creator = _creator;
+    }
+
+    function contribute(uint256 amount) external {
+        require(token.transferFrom(msg.sender, address(this), amount), "transfer failed");
+        contributed[msg.sender] += amount;
+        total += amount;
+    }
+
+    function payOut(address to, uint256 amount) external {
+        require(msg.sender == creator, "only creator");
+        require(token.transfer(to, amount), "transfer failed");
+    }
+}
+\`\`\`
+
+## Wiring notes
+
+- \`useSmartWallet\` must export \`getSmartAccountClient\` (add it to the returned object).
+- Contract writes after deploy: \`client.sendTransaction({ to: address, data: encodeFunctionData({ abi, functionName, args }) })\` — still gas-sponsored.
+- Contract reads: plain \`publicClient.readContract(...)\` against the Monad RPC.
+- The user "contributing" USDC must first approve the vault — batch approve+contribute
+  in ONE sponsored transaction with the \`calls: [...]\` pattern from sponsored_payment.`;
+
 // Belt-and-suspenders: served if the live MONSKILLS fetch fails.
 export const PLAYBOOK_FALLBACK = `# Monad Build Playbook (condensed fallback — live MONSKILLS fetch unavailable)
 

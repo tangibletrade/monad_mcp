@@ -672,3 +672,13 @@ body::before {
   font-size: 13px;
   color: var(--dim);
 }
+
+.ww-chip img {
+  width: 18px;
+  height: 18px;
+}
+
+.ww-chip img.ww-wordmark {
+  width: auto;
+  height: 15px;
+}

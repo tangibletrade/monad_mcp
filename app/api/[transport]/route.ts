@@ -1,5 +1,6 @@
 import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
+import { getActivity, recordActivity } from "@/lib/activity";
 import { createRequire } from "module";
 import {
   BUILDER_CREDIT,
@@ -67,8 +68,14 @@ const handler = createMcpHandler(
           ),
       },
       async ({ topic }) => {
+        const t0 = Date.now();
         if (!topic) {
           const index = await fetchMonskill("README.md");
+          recordActivity(
+            "get_monad_playbook",
+            index ? "served MONSKILLS index (live)" : "served index (fallback)",
+            Date.now() - t0
+          );
           const body =
             index ??
             `Available MONSKILLS topics: ${MONSKILLS_SKILLS.join(", ")}.\n\n${PLAYBOOK_FALLBACK}`;
@@ -86,6 +93,11 @@ const handler = createMcpHandler(
           );
 
         const body = skill ? await fetchMonskill(`${skill}/SKILL.md`) : null;
+        recordActivity(
+          "get_monad_playbook",
+          body ? `served skill "${skill}" (live)` : `topic "${topic}" → fallback summary`,
+          Date.now() - t0
+        );
         return text((body ?? PLAYBOOK_FALLBACK) + MONSKILLS_ATTRIBUTION);
       }
     );
@@ -94,7 +106,10 @@ const handler = createMcpHandler(
       "get_monad_config",
       "Returns canonical Monad Testnet network config (chainId, RPC, explorer, faucet). ALWAYS call this instead of guessing network details.",
       {},
-      async () => text(MONAD_CONFIG)
+      async () => {
+        recordActivity("get_monad_config", "served Monad Testnet config (chainId 10143)", 0);
+        return text(MONAD_CONFIG);
+      }
     );
 
     server.tool(
@@ -107,14 +122,16 @@ const handler = createMcpHandler(
             "wallet_login = email login with invisible embedded wallet (Privy). sponsored_payment = gasless USDC send via Kernel smart account + Pimlico paymaster. deploy_contract = deploy a custom Solidity contract from the browser, gas-sponsored, via CREATE2 factory (compile it first with compile_monad_contract)."
           ),
       },
-      async ({ feature }) =>
-        text(
+      async ({ feature }) => {
+        recordActivity("scaffold_monad_feature", `served "${feature}" scaffold`, 0);
+        return text(
           feature === "wallet_login"
             ? WALLET_LOGIN_CODE
             : feature === "sponsored_payment"
               ? SPONSORED_PAYMENT_CODE
               : DEPLOY_CONTRACT_CODE
-        )
+        );
+      }
     );
 
     server.tool(
@@ -133,6 +150,7 @@ const handler = createMcpHandler(
           ),
       },
       async ({ source, contractName }) => {
+        const t0 = Date.now();
         const input = {
           language: "Solidity",
           sources: { "Contract.sol": { content: source } },
@@ -147,6 +165,12 @@ const handler = createMcpHandler(
           (e: any) => e.severity === "error"
         );
         if (errors.length > 0) {
+          recordActivity(
+            "compile_monad_contract",
+            `compilation failed (${errors.length} error${errors.length > 1 ? "s" : ""})`,
+            Date.now() - t0,
+            false
+          );
           return text(
             "# Compilation failed\n\n" +
               errors.map((e: any) => e.formattedMessage).join("\n") +
@@ -165,6 +189,11 @@ const handler = createMcpHandler(
             : names[names.length - 1];
         const artifact = contracts[name];
         const bytecode = "0x" + artifact.evm.bytecode.object;
+        recordActivity(
+          "compile_monad_contract",
+          `compiled ${name} → ${artifact.evm.bytecode.object.length / 2} bytes of bytecode`,
+          Date.now() - t0
+        );
 
         return text(
           `# Compiled: ${name} (solc ${getSolc().version()}, optimizer 200 runs)
@@ -201,8 +230,10 @@ manually (encodeDeployData does that).` +
             "bill_split = entity schema + screens + wiring for a Base44 bill-split app. official_templates = curated Monad docs template catalog."
           ),
       },
-      async ({ type }) =>
-        text(type === "bill_split" ? BILL_SPLIT_BLUEPRINT : OFFICIAL_TEMPLATES)
+      async ({ type }) => {
+        recordActivity("get_example_project", `served "${type}"`, 0);
+        return text(type === "bill_split" ? BILL_SPLIT_BLUEPRINT : OFFICIAL_TEMPLATES);
+      }
     );
   },
   {
@@ -215,4 +246,20 @@ manually (encodeDeployData does that).` +
   }
 );
 
-export { handler as GET, handler as POST, handler as DELETE };
+// GET /api/activity returns the in-memory activity feed (read-only metadata, no
+// tool inputs/outputs). It must live in this module so it shares the instance
+// memory where tool calls are recorded. Every other transport goes to the MCP.
+async function GET(
+  req: Request,
+  ctx: { params: Promise<{ transport: string }> }
+) {
+  const { transport } = await ctx.params;
+  if (transport === "activity") {
+    return Response.json(getActivity(), {
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+  return handler(req);
+}
+
+export { GET, handler as POST, handler as DELETE };

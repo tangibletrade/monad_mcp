@@ -17,6 +17,7 @@ export default function Home() {
           </span>
         </div>
         <div className="nav-links">
+          <a href="/activity">Activity</a>
           <a href="#tools">Tools</a>
           <a href="#how">How it works</a>
           <a href="#tagme">Tag me</a>
@@ -44,10 +45,59 @@ export default function Home() {
             deployed from the browser. No seed phrases. No gas. No CLI.
           </p>
           <CopyUrl url={MCP_URL} />
-          <p className="works">
-            Works with <b>Base44</b> · <b>Lovable</b> · Claude · Cursor · all
-            vibecoding apps
-          </p>
+          <div className="works">
+            <span className="works-label">WORKS WITH</span>
+            <span className="ww-chip">
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <rect x="1" y="1" width="22" height="22" rx="6" fill="#FF5C28" />
+                <text
+                  x="12"
+                  y="16.5"
+                  textAnchor="middle"
+                  fontSize="11"
+                  fontWeight="800"
+                  fill="#fff"
+                  fontFamily="Inter, sans-serif"
+                >
+                  44
+                </text>
+              </svg>
+              Base44
+            </span>
+            <span className="ww-chip">
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <defs>
+                  <linearGradient id="lov" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#FF6B9D" />
+                    <stop offset="50%" stopColor="#FF4D8D" />
+                    <stop offset="100%" stopColor="#FF8A3D" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M12 21s-8.5-5.2-10.2-10C.4 7 2.6 3.5 6.2 3.5c2.2 0 4 1.2 5.8 3.4 1.8-2.2 3.6-3.4 5.8-3.4 3.6 0 5.8 3.5 4.4 7.5C20.5 15.8 12 21 12 21z"
+                  fill="url(#lov)"
+                />
+              </svg>
+              Lovable
+            </span>
+            <span className="ww-chip">
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <g fill="#D97757">
+                  <path d="M12 2.5l1.4 6.1L12 12l-1.4-3.4L12 2.5zM12 21.5l-1.4-6.1L12 12l1.4 3.4L12 21.5zM2.5 12l6.1-1.4L12 12l-3.4 1.4L2.5 12zM21.5 12l-6.1 1.4L12 12l3.4-1.4L21.5 12zM5.3 5.3l5.3 3.3L12 12 8.6 10.6 5.3 5.3zM18.7 18.7l-5.3-3.3L12 12l3.4 1.4 3.3 5.3zM18.7 5.3l-3.3 5.3L12 12l1.4-3.4 5.3-3.3zM5.3 18.7l3.3-5.3L12 12l-1.4 3.4-5.3 3.3z" />
+                </g>
+              </svg>
+              Claude
+            </span>
+            <span className="ww-chip">
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <path d="M12 2l9 5v10l-9 5-9-5V7l9-5z" fill="#e2e8f5" opacity="0.9" />
+                <path d="M12 2v10l9-5-9-5zM12 12v10l9-5V7l-9 5z" fill="#8b95b5" />
+                <path d="M12 12L3 7v10l9 5V12z" fill="#56608a" />
+              </svg>
+              Cursor
+            </span>
+            <span className="ww-more">+ all vibecoding apps</span>
+          </div>
         </div>
 
         <div className="term">

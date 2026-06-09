@@ -495,3 +495,180 @@ body::before {
 .footer a:hover {
   color: var(--cyan);
 }
+
+/* ---------- activity dashboard ---------- */
+.act-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 56px 28px;
+}
+
+.act-head h1 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green);
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.act-head p {
+  margin-top: 12px;
+  color: var(--dim);
+  font-size: 14.5px;
+  line-height: 1.7;
+  max-width: 64ch;
+}
+
+.act-term {
+  margin-top: 28px;
+  background: #0a0f1c;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 0 60px rgba(124, 92, 255, 0.08);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+}
+
+.act-bar {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  background: #0d1322;
+}
+
+.act-bar i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+}
+
+.act-bar i:nth-child(1) {
+  background: #ff5f57;
+}
+.act-bar i:nth-child(2) {
+  background: #febc2e;
+}
+.act-bar i:nth-child(3) {
+  background: #28c840;
+}
+
+.act-bar span {
+  margin-left: 8px;
+  color: var(--dim);
+  font-size: 11.5px;
+}
+
+.act-body {
+  padding: 16px 18px 20px;
+  min-height: 320px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.act-row {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(28, 39, 64, 0.5);
+  line-height: 1.5;
+}
+
+.act-row.dim {
+  color: var(--dim);
+}
+
+.act-row.err .act-sum {
+  color: #f87171;
+}
+
+.act-time {
+  color: var(--dim);
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.act-tool {
+  color: var(--violet);
+  flex-shrink: 0;
+  min-width: 230px;
+}
+
+.act-sum {
+  color: var(--green);
+}
+
+.act-note {
+  margin-top: 18px;
+  font-size: 12.5px;
+  color: var(--dim);
+}
+
+.act-note a {
+  color: var(--cyan);
+}
+
+/* works-with logo chips */
+.works {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.works-label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  color: var(--dim);
+  margin-right: 4px;
+}
+
+.ww-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 14px 7px 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.ww-chip:hover {
+  border-color: var(--violet);
+  transform: translateY(-1px);
+}
+
+.ww-chip svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ww-more {
+  font-size: 13px;
+  color: var(--dim);
+}
